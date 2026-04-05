@@ -1,21 +1,18 @@
 package config;
 
-import infra.DBExecutor;
 import repository.BoardRepository;
 import repository.GameRoomRepository;
-import service.GameService;
+import service.GameServiceImpl;
 
 public class ServiceConfig {
 
-    public GameService gameService(
+    public GameServiceImpl gameService(
             BoardRepository boardRepository,
-            GameRoomRepository gameRoomRepository,
-            DBExecutor dbExecutor
+            GameRoomRepository gameRoomRepository
     ) {
-        return new GameService(
+        return new GameServiceImpl(
                 boardRepository,
-                gameRoomRepository,
-                dbExecutor
+                gameRoomRepository
         );
     }
 }

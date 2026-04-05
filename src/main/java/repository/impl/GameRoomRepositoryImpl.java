@@ -1,8 +1,9 @@
 package repository.impl;
 
+import config.transactional.TransactionContext;
 import domain.place.piece.Side;
-import java.sql.Connection;
 import dto.GameRoomDto;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,8 +28,10 @@ public class GameRoomRepositoryImpl implements GameRoomRepository {
             "UPDATE game_room SET current_turn = ? WHERE id = ?";
 
     @Override
-    public long save(String name, String side,Connection conn) {
-        try (PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
+    public long save(String name, String side) {
+        try {
+            Connection conn = TransactionContext.get();
+            PreparedStatement stmt = conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS);
 
             stmt.setString(1, name);
             stmt.setString(2, side);
@@ -42,8 +45,10 @@ public class GameRoomRepositoryImpl implements GameRoomRepository {
     }
 
     @Override
-    public List<GameRoomDto> findAll(Connection conn) {
-        try (PreparedStatement stmt = conn.prepareStatement(SELECT_ALL)) {
+    public List<GameRoomDto> findAll() {
+        try {
+            Connection conn = TransactionContext.get();
+            PreparedStatement stmt = conn.prepareStatement(SELECT_ALL);
 
             List<GameRoomDto> result;
             try (ResultSet rs = stmt.executeQuery()) {
@@ -57,14 +62,17 @@ public class GameRoomRepositoryImpl implements GameRoomRepository {
     }
 
     @Override
-    public Optional<GameRoomDto> findById(long id, Connection conn) {
-        try (PreparedStatement stmt = conn.prepareStatement(SELECT_BY_ID_SQL)) {
+    public Optional<GameRoomDto> findById(long id) {
+        try {
+            Connection conn = TransactionContext.get();
+            PreparedStatement stmt = conn.prepareStatement(SELECT_BY_ID_SQL);
 
             stmt.setLong(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
-                if(rs.next())
+                if (rs.next()) {
                     return Optional.of(toGameRoom(rs));
+                }
             }
             return Optional.empty();
 
@@ -74,8 +82,11 @@ public class GameRoomRepositoryImpl implements GameRoomRepository {
     }
 
     @Override
-    public void update(long roomId, String side, Connection conn) {
-        try (PreparedStatement stmt = conn.prepareStatement(UPDATE_BY_ID)) {
+    public void update(long roomId, String side) {
+        try {
+            Connection conn = TransactionContext.get();
+            PreparedStatement stmt = conn.prepareStatement(UPDATE_BY_ID);
+
             stmt.setString(1, side);
             stmt.setLong(2, roomId);
             stmt.executeUpdate();

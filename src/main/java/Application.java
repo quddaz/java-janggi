@@ -8,7 +8,7 @@ public class Application {
         databaseInitializer.init();
 
         try {
-            Janggi janggi = new Janggi(appConfig.gameService());
+            Janggi janggi = new Janggi(appConfig.proxyGameService());
             janggi.run();
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());

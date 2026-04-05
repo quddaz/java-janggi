@@ -6,7 +6,7 @@ import java.sql.Connection;
 import java.util.Map;
 
 public interface BoardRepository {
-    void saveBoard(long roomId, Map<Position, Place> board, Connection conn);
+    void saveBoard(long roomId, Map<Position, Place> board);
 
-    Map<Position, Place> findBoard(long roomId, Connection conn);
+    Map<Position, Place> findBoard(long roomId);
 }

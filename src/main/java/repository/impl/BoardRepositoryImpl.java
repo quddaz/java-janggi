@@ -1,11 +1,12 @@
 package repository.impl;
 
-import java.sql.Connection;
+import config.transactional.TransactionContext;
+import domain.board.BoardFactory;
 import domain.place.Place;
+import domain.place.piece.PieceFactory;
 import domain.place.piece.Side;
 import domain.position.Position;
-import domain.board.BoardFactory;
-import domain.place.piece.PieceFactory;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -25,8 +26,9 @@ public class BoardRepositoryImpl implements BoardRepository {
 
 
     @Override
-    public void saveBoard(long roomId, Map<Position, Place> board, Connection conn) {
+    public void saveBoard(long roomId, Map<Position, Place> board) {
         try {
+            Connection conn = TransactionContext.get();
             deleteExisting(conn, roomId);
             insertBoard(conn, roomId, board);
         } catch (SQLException e) {
@@ -66,8 +68,10 @@ public class BoardRepositoryImpl implements BoardRepository {
     }
 
     @Override
-    public Map<Position, Place> findBoard(long roomId, Connection conn) {
-        try (PreparedStatement stmt = conn.prepareStatement(SELECT_SQL)) {
+    public Map<Position, Place> findBoard(long roomId) {
+        try {
+            Connection conn = TransactionContext.get();
+            PreparedStatement stmt = conn.prepareStatement(SELECT_SQL);
 
             stmt.setLong(1, roomId);
 

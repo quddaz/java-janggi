@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface GameRoomRepository {
-    long save(String name, String side, Connection conn);
+    long save(String name, String side);
 
-    List<GameRoomDto> findAll(Connection conn);
+    List<GameRoomDto> findAll();
 
-    Optional<GameRoomDto> findById(long id, Connection conn);
+    Optional<GameRoomDto> findById(long id);
 
-    void update(long id, String side, Connection conn);
+    void update(long id, String side);
 }

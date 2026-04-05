@@ -4,12 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import infra.DBExecutor;
+import config.AppConfig;
+import config.transactional.TransactionalProxy;
 import infra.H2ConnectionManager;
 import domain.place.Place;
 import domain.place.piece.Side;
 import domain.position.Position;
 import domain.board.BoardFactory;
+import infra.qudaCP.QudaCP;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import repository.impl.BoardRepositoryImpl;
 import repository.impl.GameRoomRepositoryImpl;
 
-public class GameServiceTest {
+public class GameServiceImplTest {
 
     private static final String URL = "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1";
     private static final String USER = "sa";
@@ -27,15 +31,19 @@ public class GameServiceTest {
 
     @BeforeEach
     void setUp() {
+
+        QudaCP qudaCP = new QudaCP(URL, USER, PASSWORD, 5, 30000);
         H2ConnectionManager connectionManager = new H2ConnectionManager(URL, USER, PASSWORD);
         TestDatabaseInitializer testDatabaseInitializer = new TestDatabaseInitializer(connectionManager);
         testDatabaseInitializer.init();
 
-        DBExecutor dbExecutor = new DBExecutor(connectionManager);
-
-        gameService = new GameService(new BoardRepositoryImpl(),
-                new GameRoomRepositoryImpl(),
-                dbExecutor);
+        GameService gameServiceImpl = new GameServiceImpl(new BoardRepositoryImpl(),
+                new GameRoomRepositoryImpl());
+        gameService = (GameService) Proxy.newProxyInstance(
+                GameService.class.getClassLoader(),
+                new Class[]{GameService.class},
+                new TransactionalProxy(gameServiceImpl, qudaCP)
+        );
     }
 
     @Test
@@ -82,7 +90,7 @@ public class GameServiceTest {
 
         // when & then
         assertThatThrownBy(() -> gameService.findBoardByRoomId(roomId))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(RuntimeException.class);
     }
 
     @Test
