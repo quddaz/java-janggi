@@ -56,5 +56,4 @@ public class GameService {
             return dbExecutor.transaction(gameRoomRepository::findAll);
     }
 
-
 }

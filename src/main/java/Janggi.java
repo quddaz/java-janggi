@@ -16,55 +16,73 @@ import view.OutputView;
 public class Janggi {
 
     private final GameService gameService;
-    private Side turn = Side.CHO;
-    private Long currentRoomId;
+    private Game game;
 
     public Janggi(GameService gameService) {
         this.gameService = gameService;
     }
 
     public void run() {
-        Board board = getBoard();
-        play(board);
-
-        OutputView.printWinner(turn.opposite());
+        game = createGame();
+        play(game);
+        OutputView.printWinner(game.getTurn().opposite());
     }
 
-    private Board getBoard() {
+    private Game createGame() {
         OutputView.printStartMenu();
-        boolean answer = RetryHandler.retryInput(() -> AnswerParser.parse(InputView.readLine()));
+
+        boolean answer = RetryHandler.retryInput(() ->
+                AnswerParser.parse(InputView.readLine())
+        );
 
         if (answer) {
-            return getSaveBoard();
+            return loadGame();
         }
-        return getNewBoard();
+        return newGame();
     }
 
-    private Board getSaveBoard() {
+    private Game loadGame() {
         OutputView.printSaveRoomList(gameService.findGameRoomAll());
-        long roomId = RetryHandler.retryInput(() -> NumberParser.parse(InputView.readLine()));
 
-        if (roomId == 0) {
-            return getNewBoard();
+        long roomId = readRoomId();
+
+        if (isNewGameRequest(roomId)) {
+            return newGame();
         }
 
-        this.currentRoomId = roomId;
-        GameRoomDto gameRoomDto = gameService.findGameRoomByRoomId(roomId);
-        turn = gameRoomDto.side();
-        return new Board(gameService.findBoardByRoomId(roomId));
+        return createLoadedGame(roomId);
     }
 
-    private Board getNewBoard() {
+    private long readRoomId() {
+        return RetryHandler.retryInput(() ->
+                NumberParser.parse(InputView.readLine())
+        );
+    }
+
+    private boolean isNewGameRequest(long roomId) {
+        return roomId == 0;
+    }
+
+    private Game createLoadedGame(long roomId) {
+        GameRoomDto gameRoomDto = gameService.findGameRoomByRoomId(roomId);
+        Board board = new Board(gameService.findBoardByRoomId(roomId));
+
+        return new Game(board, gameRoomDto.side(), roomId);
+    }
+
+    private Game newGame() {
         HorseElephantFormation cho = getHorseElephantFormation(Side.CHO);
         HorseElephantFormation han = getHorseElephantFormation(Side.HAN);
-        this.currentRoomId = null;
-        return BoardFactory.create(cho, han);
+
+        Board board = BoardFactory.create(cho, han);
+
+        return new Game(board, Side.CHO, null);
     }
 
-    private void play(Board board) {
-        while (board.isAliveGeneral(turn)) {
-            processTurn(board);
-            turn = turn.opposite();
+    private void play(Game game) {
+        while (!game.isFinished()) {
+            processTurn(game);
+            game.nextTurn();
         }
     }
 
@@ -74,18 +92,20 @@ public class Janggi {
         return HorseElephantFormation.from(input);
     }
 
-    private void processTurn(Board board) {
-        OutputView.printBoard(board.getFormatBoard(), board.getSideBoard());
-        printScore(board);
+    private void processTurn(Game game) {
+        Board board = game.getBoard();
 
-        executeTurn(board);
-        printCheckIfNeeded(board);
+        OutputView.printBoard(board.getFormatBoard(), board.getSideBoard());
+        printScore(game);
+
+        executeTurn(game);
+        printCheckIfNeeded(game);
     }
 
-    private void executeTurn(Board board) {
+    private void executeTurn(Game game) {
         while (true) {
             try {
-                executeMove(board);
+                executeMove(game);
                 return;
             } catch (IllegalArgumentException e) {
                 OutputView.printErrorMessage(e.getMessage());
@@ -93,15 +113,18 @@ public class Janggi {
         }
     }
 
-    private void executeMove(Board board) {
+    private void executeMove(Game game) {
+        Board board = game.getBoard();
+
         Position from = getFrom(board);
         Position to = getTo();
-        board.move(from, to, turn);
+
+        game.move(from, to);
     }
 
     private Position getFrom(Board board) {
         while (true) {
-            OutputView.printPieceMove(turn);
+            OutputView.printPieceMove(game.getTurn());
             String input = InputView.readLine();
 
             if (CommandParser.parse(input)) {
@@ -115,7 +138,8 @@ public class Janggi {
 
     private void save(Board board) {
         OutputView.printGameName();
-        if(isNewGame()){
+
+        if (isNewGame()) {
             saveGame(board);
             return;
         }
@@ -123,36 +147,35 @@ public class Janggi {
     }
 
     private boolean isNewGame() {
-        return currentRoomId == null;
+        return game.getRoomId() == null;
     }
 
-    private void saveGame(Board board){
+    private void saveGame(Board board) {
         String name = InputView.readLine();
-        gameService.saveGame(board.board(), name, turn);
+        gameService.saveGame(board.board(), name, game.getTurn());
         OutputView.printSaveComplete();
     }
 
-    private void updateGame(Board board){
-        gameService.updateGame(board.board(), turn, currentRoomId);
+    private void updateGame(Board board) {
+        gameService.updateGame(board.board(), game.getTurn(), game.getRoomId());
         OutputView.printUpdateComplete();
     }
 
     private Position getTo() {
-        OutputView.printPositionMove(turn);
+        OutputView.printPositionMove(game.getTurn());
         return PositionParser.parsePosition(InputView.readLine());
     }
 
-    private void printCheckIfNeeded(Board board) {
-        if (board.isCheck(turn)) {
-            OutputView.printCheck(turn.opposite());
+    private void printCheckIfNeeded(Game game) {
+        if (game.isCheck()) {
+            OutputView.printCheck(game.getTurn().opposite());
         }
     }
 
-    private void printScore(Board board) {
-        double choScore = board.getSideScore(Side.CHO);
-        double hanScore = board.getSideScore(Side.HAN);
+    private void printScore(Game game) {
+        double choScore = game.getScore(Side.CHO);
+        double hanScore = game.getScore(Side.HAN);
 
         OutputView.printScore(Side.CHO, choScore, Side.HAN, hanScore);
     }
-
 }
