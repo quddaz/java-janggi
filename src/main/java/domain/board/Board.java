@@ -39,6 +39,9 @@ public class Board {
     private boolean moveValid(Position from, Position to){
         Place fromPlace = board.get(from);
         List<Position> path = fromPlace.getPath(from, to);
+        if(path.isEmpty())
+            return false;
+
         List<Place> places = getPlaces(path);
         return fromPlace.canMove(places);
     }
@@ -48,13 +51,6 @@ public class Board {
         return path.stream()
                 .map(position -> board.getOrDefault(position, new Empty()))
                 .toList();
-    }
-
-    private Map<Position, Place> getObstacles(List<Position> path) {
-        return path.stream()
-                .map(position -> Map.entry(position, board.get(position)))
-                .filter(entry -> !entry.getValue().isEmpty())
-                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
     private void validateMove(Position from, Position to, Side side) {

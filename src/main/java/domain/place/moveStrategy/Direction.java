@@ -22,8 +22,8 @@ public enum Direction {
     }
 
     public static Direction straight(Position from, Position to) {
-        int row = Integer.compare(to.getColumn(), from.getColumn());
-        int column = Integer.compare(to.getRow(), from.getRow());
+        int row = Integer.compare(to.getRow(), from.getRow());
+        int column = Integer.compare(to.getColumn(), from.getColumn());
 
         if (!(from.getRow() == to.getRow() || from.getColumn() == to.getColumn())) {
             throw new IllegalArgumentException("직선 이동 아님");
@@ -36,8 +36,8 @@ public enum Direction {
     }
 
     public static Direction diagonal(Position from, Position to) {
-        int row = Integer.compare(to.getColumn(), from.getColumn());
-        int column = Integer.compare(to.getRow(), from.getRow());
+        int row = Integer.compare(to.getRow(), from.getRow());
+        int column = Integer.compare(to.getColumn(), from.getColumn());
 
         if (Math.abs(to.getRow() - from.getRow()) !=
                 Math.abs(to.getColumn() - from.getColumn())) {

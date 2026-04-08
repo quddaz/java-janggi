@@ -26,6 +26,7 @@ public class ElephantMoveStrategy implements MoveStrategy {
         return ELEPHANT_MOVE_SEQUENCES.stream()
                 .map(sequence -> moveSteps(from, sequence))
                 .flatMap(Optional::stream)
+                .filter(this::isValidPath)
                 .filter(path -> isDestination(path, to))
                 .findFirst()
                 .orElse(Collections.emptyList());
@@ -33,17 +34,13 @@ public class ElephantMoveStrategy implements MoveStrategy {
 
     @Override
     public boolean canMove(List<Place> places, Side fromSide) {
-        if (places.size() != 3) {
+        if (!isValidPlaceSize(places)) {
             return false;
         }
 
-        if (isBlockedAtFirstStep(places)) {
-            return false;
-        }
-        if (isBlockedAtSecondStep(places)) {
-            return false;
-        }
-        return !isDestinationBlocked(places, fromSide);
+        return !isBlockedAtFirstStep(places)
+                && !isBlockedAtSecondStep(places)
+                && !isDestinationBlocked(places, fromSide);
     }
 
     private Optional<List<Position>> moveSteps(Position from, List<Direction> sequence) {
@@ -51,26 +48,33 @@ public class ElephantMoveStrategy implements MoveStrategy {
         Position current = from;
 
         for (Direction direction : sequence) {
-            current = moveOrNull(current, direction);
-            if (current == null) {
+            Optional<Position> next = current.moveIfInBounds(direction);
+
+            if (next.isEmpty()) {
                 return Optional.empty();
             }
+
+            current = next.get();
             result.add(current);
         }
 
         return Optional.of(result);
     }
 
-    private Position moveOrNull(Position from, Direction direction) {
-        return from.moveIfInBounds(direction).orElse(null);
+    private boolean isValidPath(List<Position> path) {
+        return path.size() == 3;
     }
 
     private boolean isDestination(List<Position> path, Position to) {
-        return path.get(2).equals(to);
+        return isValidPath(path) && path.get(2).equals(to);
+    }
+
+    private boolean isValidPlaceSize(List<Place> places) {
+        return places.size() == 3;
     }
 
     private boolean isBlockedAtFirstStep(List<Place> places) {
-        return !places.get(0).isEmpty();
+        return !places.getFirst().isEmpty();
     }
 
     private boolean isBlockedAtSecondStep(List<Place> places) {
@@ -80,5 +84,4 @@ public class ElephantMoveStrategy implements MoveStrategy {
     private boolean isDestinationBlocked(List<Place> places, Side fromSide) {
         return places.get(2).hasSide(fromSide);
     }
-
 }

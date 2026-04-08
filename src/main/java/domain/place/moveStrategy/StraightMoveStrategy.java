@@ -1,5 +1,6 @@
 package domain.place.moveStrategy;
 
+import domain.place.PalaceArea;
 import domain.place.Place;
 import domain.place.piece.Side;
 import domain.position.Position;
@@ -10,46 +11,64 @@ import java.util.List;
 public class StraightMoveStrategy implements MoveStrategy {
 
     @Override
-    public List<Position> getPath(Position from, Position to) {
-        if (!from.isStraightWith(to)) {
+    public List<Position> getPath(Position from, Position target) {
+
+        if (isPalaceMove(from, target)) {
+            return getPalacePath(from, target);
+        }
+
+        if (!from.isStraightWith(target)) {
             return Collections.emptyList();
         }
 
-        Direction direction = Direction.straight(from, to);
-        return createPath(from, to, direction);
+        Direction direction = Direction.straight(from, target);
+        return createPath(from, target, direction);
     }
 
-    @Override
-    public boolean canMove(List<Place> places, Side fromSide) {
-        if (places.isEmpty()) {
-            return false;
-        }
-        if (isDestinationBlocked(places, fromSide)) {
-            return false;
-        }
-        return isPathClear(places);
+    private boolean isPalaceMove(Position from, Position to) {
+        return PalaceArea.isInsideSpecialPalace(from) && PalaceArea.isInsideSpecialPalace(to);
     }
 
-    private List<Position> createPath(Position from, Position to, Direction direction) {
+    private List<Position> getPalacePath(Position from, Position target) {
+        if (!isValidPalaceStraight(from, target)) {
+            return Collections.emptyList();
+        }
+
+        Direction direction = Direction.straight(from, target);
+        return createPalacePath(from, target, direction);
+    }
+
+    private boolean isValidPalaceStraight(Position from, Position to) {
+        return from.getRow() == to.getRow() || from.getColumn() == to.getColumn();
+    }
+
+    private List<Position> createPalacePath(Position from, Position target, Direction direction) {
         List<Position> path = new ArrayList<>();
         Position current = from;
 
-        while (!current.equals(to)) {
-            current = moveOrThrow(current, direction);
+        while (!current.equals(target)) {
+            current = current.moveIfInBounds(direction)
+                    .filter(PalaceArea::isInsidePalace)
+                    .orElseThrow(() -> new IllegalArgumentException("궁성 이동 범위 벗어남"));
             path.add(current);
         }
 
         return path;
     }
 
-    private Position moveOrThrow(Position current, Direction direction) {
-        return current.moveIfInBounds(direction)
-                .orElseThrow(() -> new IllegalArgumentException("직선 이동 범위 벗어남"));
+    @Override
+    public boolean canMove(List<Place> places, Side movingSide) {
+        return isValidPlaceSize(places)
+                && !isDestinationBlocked(places, movingSide)
+                && isPathClear(places);
     }
 
-    private boolean isDestinationBlocked(List<Place> places, Side fromSide) {
-        Place dest = getLast(places);
-        return dest.hasSide(fromSide);
+    private boolean isValidPlaceSize(List<Place> places) {
+        return !places.isEmpty();
+    }
+
+    private boolean isDestinationBlocked(List<Place> places, Side movingSide) {
+        return getLast(places).hasSide(movingSide);
     }
 
     private boolean isPathClear(List<Place> places) {
@@ -62,6 +81,23 @@ public class StraightMoveStrategy implements MoveStrategy {
     }
 
     private Place getLast(List<Place> places) {
-        return places.get(places.size() - 1);
+        return places.getLast();
+    }
+
+    private List<Position> createPath(Position from, Position target, Direction direction) {
+        List<Position> path = new ArrayList<>();
+        Position current = from;
+
+        while (!current.equals(target)) {
+            current = moveOrThrow(current, direction);
+            path.add(current);
+        }
+
+        return path;
+    }
+
+    private Position moveOrThrow(Position current, Direction direction) {
+        return current.moveIfInBounds(direction)
+                .orElseThrow(() -> new IllegalArgumentException("직선 이동 범위 벗어남"));
     }
 }

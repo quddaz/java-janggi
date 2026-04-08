@@ -13,100 +13,91 @@ import java.util.Optional;
 public class JumpMoveStrategy implements MoveStrategy {
 
     @Override
-    public List<Position> getPath(Position from, Position to) {
-        if (isPalaceMove(from, to)) {
-            return getPalacePath(from, to);
+    public List<Position> getPath(Position fromPosition, Position targetPosition) {
+
+        if (isPalaceMove(fromPosition, targetPosition)) {
+            return getPalacePath(fromPosition, targetPosition);
         }
 
-        if (!from.isStraightWith(to)) {
+        if (!fromPosition.isStraightWith(targetPosition)) {
             return Collections.emptyList();
         }
 
-        Direction direction = Direction.straight(from, to);
-        return collectPath(from, to, direction);
+        Direction direction = Direction.straight(fromPosition, targetPosition);
+        return collectPath(fromPosition, targetPosition, direction);
     }
 
     @Override
-    public boolean canMove(List<Place> places, Side fromSide) {
-        if (places.isEmpty()) {
-            return false;
-        }
-        if (isDestinationBlocked(places, fromSide)) {
-            return false;
-        }
-        if (containsInvalidJump(places)) {
-            return false;
-        }
-        return hasExactlyOneObstacle(places);
+    public boolean canMove(List<Place> places, Side movingSide) {
+        return isValidPlaceSize(places)
+                && !isDestinationBlocked(places, movingSide)
+                && !containsInvalidJump(places)
+                && hasExactlyOneObstacle(places);
     }
 
-    private boolean isPalaceMove(Position from, Position to) {
-        return PalaceArea.isInsidePalace(from)
-                && PalaceArea.isInsidePalace(to);
+    private boolean isPalaceMove(Position fromPosition, Position targetPosition) {
+        return PalaceArea.isInsideSpecialPalace(fromPosition)
+                && PalaceArea.isInsideSpecialPalace(targetPosition);
     }
 
-    private List<Position> getPalacePath(Position from, Position to) {
-        if (isInvalidPalaceDiagonal(from, to)) {
+    private List<Position> getPalacePath(Position fromPosition, Position targetPosition) {
+        if (!isValidPalaceDiagonal(fromPosition, targetPosition)) {
             return Collections.emptyList();
         }
 
-        return createPath(from, to);
-    }
-
-    private boolean isInvalidPalaceDiagonal(Position from, Position to) {
-        return !isValidPalaceDiagonal(from, to);
-    }
-
-    private List<Position> createPath(Position from, Position to) {
+        Direction direction = Direction.diagonal(fromPosition, targetPosition);
         List<Position> path = new ArrayList<>();
-        Direction direction = Direction.diagonal(from, to);
 
-        Position current = from;
-
-        while (!current.equals(to)) {
-            current = moveOrThrow(current, direction);
-            path.add(current);
+        if (!collectPalacePath(fromPosition, targetPosition, direction, path)) {
+            return Collections.emptyList();
         }
-
         return path;
     }
 
-    private Position moveOrThrow(Position current, Direction direction) {
-        return current.moveIfInBounds(direction)
-                .orElseThrow(() -> new IllegalArgumentException("궁 이동 범위 벗어남"));
+    private boolean collectPalacePath(Position from, Position target, Direction direction, List<Position> path) {
+        Position current = from;
+        while (!current.equals(target)) {
+            Optional<Position> next = move(current, direction);
+            if (next.isEmpty()) {
+                return false;
+            }
+            current = next.get();
+            if (!PalaceArea.isInsidePalace(current)) {
+                return false;
+            }
+            path.add(current);
+        }
+        path.add(current);
+        return true;
     }
 
-    private boolean isValidPalaceDiagonal(Position from, Position to) {
-        return Math.abs(from.getRow() - to.getRow()) ==
-                Math.abs(from.getColumn() - to.getColumn());
+    private Optional<Position> move(Position position, Direction direction) {
+        return position.moveIfInBounds(direction);
     }
 
-    private List<Position> collectPath(Position from, Position to, Direction direction) {
+    private boolean isValidPalaceDiagonal(Position fromPosition, Position targetPosition) {
+        return Math.abs(fromPosition.getRow() - targetPosition.getRow()) ==
+                Math.abs(fromPosition.getColumn() - targetPosition.getColumn());
+    }
+
+    private List<Position> collectPath(Position fromPosition, Position targetPosition, Direction direction) {
         List<Position> path = new ArrayList<>();
-        Optional<Position> current = from.moveIfInBounds(direction);
+        Optional<Position> current = fromPosition.moveIfInBounds(direction);
 
         while (current.isPresent()) {
-            if (addAndCheckReached(path, current.get(), to)) {
+            Position pos = current.get();
+            path.add(pos);
+            if (pos.equals(targetPosition)) {
                 return path;
             }
-            current = moveNext(current.get(), direction);
+            current = pos.moveIfInBounds(direction);
         }
-
         return Collections.emptyList();
     }
 
-    private boolean addAndCheckReached(List<Position> path, Position pos, Position to) {
-        path.add(pos);
-        return pos.equals(to);
-    }
-
-    private Optional<Position> moveNext(Position pos, Direction direction) {
-        return pos.moveIfInBounds(direction);
-    }
-
-    private boolean isDestinationBlocked(List<Place> places, Side fromSide) {
-        Place dest = getLast(places);
-        return dest.hasSide(fromSide) || dest.isSameSymbol(PieceSymbol.CANNON);
+    private boolean isDestinationBlocked(List<Place> places, Side movingSide) {
+        Place destination = getLast(places);
+        return destination.hasSide(movingSide) || destination.isSameSymbol(PieceSymbol.CANNON);
     }
 
     private boolean containsInvalidJump(List<Place> places) {
@@ -120,11 +111,15 @@ public class JumpMoveStrategy implements MoveStrategy {
                 .count() == 1;
     }
 
+    private boolean isValidPlaceSize(List<Place> places) {
+        return !places.isEmpty();
+    }
+
     private List<Place> getMiddle(List<Place> places) {
         return places.subList(0, places.size() - 1);
     }
 
     private Place getLast(List<Place> places) {
-        return places.get(places.size() - 1);
+        return places.getLast();
     }
 }

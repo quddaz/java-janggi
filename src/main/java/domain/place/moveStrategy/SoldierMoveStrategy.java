@@ -1,43 +1,86 @@
 package domain.place.moveStrategy;
 
+import domain.place.PalaceArea;
 import domain.place.Place;
 import domain.place.piece.Side;
 import domain.position.Position;
+import java.util.Collections;
 import java.util.List;
 
 public class SoldierMoveStrategy implements MoveStrategy {
 
-    private final List<Direction> directions;
+    private final List<Direction> normalDirections;
+    private final List<Direction> palaceDirections;
 
     public SoldierMoveStrategy(Side side) {
-        this.directions = initDirections(side);
+        this.normalDirections = initNormalDirections(side);
+        this.palaceDirections = initPalaceDirections(side);
     }
 
-    private List<Direction> initDirections(Side side) {
+    private List<Direction> initNormalDirections(Side side) {
         if (side == Side.CHO) {
             return List.of(Direction.DOWN, Direction.LEFT, Direction.RIGHT);
         }
         return List.of(Direction.TOP, Direction.LEFT, Direction.RIGHT);
     }
 
-    @Override
-    public List<Position> getPath(Position from, Position to) {
-        return directions.stream()
-                .flatMap(direction -> from.moveIfInBounds(direction).stream())
-                .filter(to::equals)
-                .toList();
-    }
-
-    @Override
-    public boolean canMove(List<Place> places, Side fromSide) {
-        if (places.isEmpty()) {
-            return false;
+    private List<Direction> initPalaceDirections(Side side) {
+        if (side == Side.CHO) {
+            return List.of(Direction.LEFT_DOWN, Direction.RIGHT_DOWN);
         }
-        return !isDestinationBlocked(places, fromSide);
+        return List.of(Direction.LEFT_TOP, Direction.RIGHT_TOP);
     }
 
-    private boolean isDestinationBlocked(List<Place> places, Side fromSide) {
-        Place dest = places.get(places.size() - 1);
-        return dest.hasSide(fromSide);
+    @Override
+    public List<Position> getPath(Position from, Position target) {
+
+        if (isInsidePalace(from, target)) {
+            return getPalacePath(from, target);
+        }
+
+        if (!from.isStraightWith(target)) {
+            return Collections.emptyList();
+        }
+
+        return getNormalPath(from, target);
+    }
+
+    private boolean isInsidePalace(Position from, Position to) {
+        return PalaceArea.isInsideSpecialPalace(from) && PalaceArea.isInsideSpecialPalace(to);
+    }
+
+    private List<Position> getPalacePath(Position from, Position target) {
+        return palaceDirections.stream()
+                .flatMap(d -> from.moveIfInBounds(d).stream())
+                .filter(target::equals)
+                .map(List::of)
+                .findFirst()
+                .orElse(Collections.emptyList());
+    }
+
+    private List<Position> getNormalPath(Position from, Position target) {
+        return normalDirections.stream()
+                .flatMap(d -> from.moveIfInBounds(d).stream())
+                .filter(target::equals)
+                .map(List::of)
+                .findFirst()
+                .orElse(Collections.emptyList());
+    }
+
+    @Override
+    public boolean canMove(List<Place> places, Side movingSide) {
+        return isValidPlaceSize(places) && !isDestinationBlocked(places, movingSide);
+    }
+
+    private boolean isValidPlaceSize(List<Place> places) {
+        return !places.isEmpty();
+    }
+
+    private boolean isDestinationBlocked(List<Place> places, Side movingSide) {
+        return getLast(places).hasSide(movingSide);
+    }
+
+    private Place getLast(List<Place> places) {
+        return places.getLast();
     }
 }

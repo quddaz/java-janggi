@@ -3,7 +3,6 @@ package domain.board;
 import domain.place.Place;
 import domain.place.moveStrategy.ElephantMoveStrategy;
 import domain.place.moveStrategy.HorseMoveStrategy;
-import domain.place.palaceMoveStrategy.PalaceRestrictedMoveStrategy;
 import domain.place.piece.Elephant;
 import domain.place.piece.Horse;
 import domain.place.piece.Side;

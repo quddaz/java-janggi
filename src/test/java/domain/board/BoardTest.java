@@ -3,10 +3,9 @@ package domain.board;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import domain.palaceMoveStrategy.PalaceStraightMoveStrategy;
 import domain.place.moveStrategy.OneStepMoveStrategy;
-import domain.place.moveStrategy.StraightMoveStrategy;
 import domain.place.moveStrategy.SoldierMoveStrategy;
+import domain.place.moveStrategy.StraightMoveStrategy;
 import domain.place.piece.Chariot;
 import domain.place.piece.General;
 import domain.place.piece.Side;
@@ -33,7 +32,7 @@ class BoardTest {
         Position position3 = new Position(10, 9);
         stubBoard.put(position3, new Chariot(Side.CHO, new StraightMoveStrategy()));
 
-        stubBoard.put(new Position(2,5), new General(Side.CHO, new OneStepMoveStrategy()));
+        stubBoard.put(new Position(2, 5), new General(Side.CHO, new OneStepMoveStrategy()));
 
         Position position4 = new Position(6, 1);
         stubBoard.put(position4, new Soldier(Side.HAN, new SoldierMoveStrategy(Side.HAN)));
@@ -114,7 +113,7 @@ class BoardTest {
 
     @Test
     @DisplayName("기물 점수 계산")
-    void board_calculate_side(){
+    void board_calculate_side() {
         //given & when
         double cho = board.getSideScore(Side.CHO);
         double han = board.getSideScore(Side.HAN);
@@ -126,7 +125,7 @@ class BoardTest {
 
     @Test
     @DisplayName("보드에 궁이 살아있는지 검사")
-    void board_alive_general(){
+    void board_alive_general() {
         //given & when & then
         assertThat(board.isAliveGeneral(Side.CHO)).isTrue();
         assertThat(board.isAliveGeneral(Side.HAN)).isFalse();

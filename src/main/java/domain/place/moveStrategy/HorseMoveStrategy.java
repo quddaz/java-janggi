@@ -21,49 +21,54 @@ public class HorseMoveStrategy implements MoveStrategy {
     );
 
     @Override
-    public List<Position> getPath(Position from, Position to) {
+    public List<Position> getPath(Position fromPosition, Position targetPosition) {
         return HORSE_MOVE_SEQUENCES.stream()
-                .map(sequence -> createPath(from, sequence))
+                .map(sequence -> createPath(fromPosition, sequence))
                 .flatMap(Optional::stream)
-                .filter(path -> isDestination(path, to))
+                .filter(this::isValidPath)
+                .filter(path -> isDestination(path, targetPosition))
                 .findFirst()
                 .orElse(Collections.emptyList());
     }
 
     @Override
-    public boolean canMove(List<Place> places, Side fromSide) {
-        if (places.size() != 2) {
+    public boolean canMove(List<Place> places, Side movingSide) {
+        if (!isValidPlaceSize(places)) {
             return false;
         }
 
-        if (isBlockedAtFirstStep(places)) {
-            return false;
-        }
-        return !isDestinationBlocked(places, fromSide);
+        return !isBlockedAtFirstStep(places)
+                && !isDestinationBlocked(places, movingSide);
     }
 
-    private Optional<List<Position>> createPath(Position from, List<Direction> sequence) {
-        Direction first = sequence.get(0);
-        Direction second = sequence.get(1);
+    private Optional<List<Position>> createPath(Position fromPosition, List<Direction> sequence) {
+        Direction firstDirection = sequence.get(0);
+        Direction secondDirection = sequence.get(1);
 
-        return from.moveIfInBounds(first)
-                .flatMap(firstPos ->
-                        firstPos.moveIfInBounds(second)
-                                .map(secondPos -> List.of(firstPos, secondPos))
+        return fromPosition.moveIfInBounds(firstDirection)
+                .flatMap(firstPosition ->
+                        firstPosition.moveIfInBounds(secondDirection)
+                                .map(secondPosition -> List.of(firstPosition, secondPosition))
                 );
     }
 
-    private boolean isDestination(List<Position> path, Position to) {
-        return path.get(1).equals(to);
+    private boolean isValidPath(List<Position> path) {
+        return path.size() == 2;
+    }
+
+    private boolean isDestination(List<Position> path, Position targetPosition) {
+        return isValidPath(path) && path.get(1).equals(targetPosition);
+    }
+
+    private boolean isValidPlaceSize(List<Place> places) {
+        return places != null && places.size() == 2;
     }
 
     private boolean isBlockedAtFirstStep(List<Place> places) {
-        Place first = places.get(0);
-        return !first.isEmpty();
+        return !places.getFirst().isEmpty();
     }
 
-    private boolean isDestinationBlocked(List<Place> places, Side fromSide) {
-        Place dest = places.get(1);
-        return dest.hasSide(fromSide);
+    private boolean isDestinationBlocked(List<Place> places, Side movingSide) {
+        return places.get(1).hasSide(movingSide);
     }
 }

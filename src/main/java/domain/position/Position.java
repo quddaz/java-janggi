@@ -38,7 +38,7 @@ public class Position {
     }
 
     public boolean isStraightWith(Position other) {
-        return this.row == other.row || this.column == other.column;
+        return getRow() == other.getRow() || getColumn() == other.getColumn();
     }
 
     @Override

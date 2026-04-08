@@ -4,12 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import infra.DBExecutor;
-import infra.H2ConnectionManager;
+import domain.board.BoardFactory;
 import domain.place.Place;
 import domain.place.piece.Side;
 import domain.position.Position;
-import domain.board.BoardFactory;
+import infra.DBExecutor;
+import infra.H2ConnectionManager;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
