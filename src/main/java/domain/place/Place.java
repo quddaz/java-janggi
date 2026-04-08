@@ -21,12 +21,9 @@ public interface Place {
 
     Optional<Side> getSide();
 
-    List<Position> getNormalPath(Position from);
+    List<Position> getPath(Position from, Position to);
 
-    List<Position> getPalacePath(Position from);
+    boolean canMove(List<Place> path);
 
-    boolean canNormalMove(Map<Position, Place> obstacles, Position from, Position to);
-
-    boolean canPalaceMove(Map<Position, Place> obstacles, Position from, Position to);
 
 }

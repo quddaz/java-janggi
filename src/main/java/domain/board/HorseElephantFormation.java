@@ -45,11 +45,11 @@ public enum HorseElephantFormation {
     }
 
     private static Place horse(Side side) {
-        return new Horse(side, new HorseMoveStrategy(), new PalaceRestrictedMoveStrategy());
+        return new Horse(side, new HorseMoveStrategy());
     }
 
     private static Place elephant(Side side) {
-        return new Elephant(side, new ElephantMoveStrategy(), new PalaceRestrictedMoveStrategy());
+        return new Elephant(side, new ElephantMoveStrategy());
     }
 
     public List<Function<Side, Place>> getFormationMethod() {

@@ -37,6 +37,10 @@ public class Position {
         return row.isOutBoundRow(currentRow) || column.isOutBoundColumn(currentColumn);
     }
 
+    public boolean isStraightWith(Position other) {
+        return this.row == other.row || this.column == other.column;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

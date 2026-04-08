@@ -2,6 +2,7 @@ package domain.board;
 
 import domain.place.Empty;
 import domain.place.Place;
+import domain.place.moveStrategy.MoveStrategy;
 import domain.place.piece.PieceSymbol;
 import domain.place.piece.Side;
 import domain.position.Position;
@@ -27,30 +28,26 @@ public class Board {
 
     public void move(Position from, Position to, Side side) {
         validateMove(from, to, side);
+        moveValid(from, to);
 
-        Place fromPlace = board.get(from);
-
-        if (!moveValid(from, to, fromPlace)) {
+        if (!moveValid(from, to)) {
             throw new IllegalArgumentException("[ERROR] 기물이 가지 못하는 자리입니다.");
         }
         movePiece(from, to);
     }
 
-    private boolean moveValid(Position from, Position to, Place fromPlace) {
-        boolean normalMoveFlag = normalMoveValid(from, to, fromPlace);
-        boolean palaceMoveFlag = palaceMoveValid(from, to, fromPlace);
-
-        return normalMoveFlag || palaceMoveFlag;
+    private boolean moveValid(Position from, Position to){
+        Place fromPlace = board.get(from);
+        List<Position> path = fromPlace.getPath(from, to);
+        List<Place> places = getPlaces(path);
+        return fromPlace.canMove(places);
     }
 
-    private boolean normalMoveValid(Position from, Position to, Place fromPlace) {
-        Map<Position, Place> obstacles = getObstacles(fromPlace.getNormalPath(from));
-        return fromPlace.canNormalMove(obstacles, from, to);
-    }
 
-    private boolean palaceMoveValid(Position from, Position to, Place fromPlace) {
-        Map<Position, Place> obstacles = getObstacles(fromPlace.getPalacePath(from));
-        return fromPlace.canPalaceMove(obstacles, from, to);
+    private List<Place> getPlaces(List<Position> path) {
+        return path.stream()
+                .map(position -> board.getOrDefault(position, new Empty()))
+                .toList();
     }
 
     private Map<Position, Place> getObstacles(List<Position> path) {
@@ -84,7 +81,7 @@ public class Board {
 
         return board.entrySet().stream()
                 .filter(e -> e.getValue().hasSide(attackingSide))
-                .anyMatch(e -> moveValid(e.getKey(), generalPos, e.getValue()));
+                .anyMatch(e -> moveValid(e.getKey(), generalPos));
     }
 
     private Position getGeneral(Side side) {

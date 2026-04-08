@@ -1,11 +1,9 @@
 package domain.place.moveStrategy;
 
-import domain.place.Empty;
 import domain.place.Place;
 import domain.place.piece.Side;
 import domain.position.Position;
 import java.util.List;
-import java.util.Map;
 
 public class SoldierMoveStrategy implements MoveStrategy {
 
@@ -23,22 +21,23 @@ public class SoldierMoveStrategy implements MoveStrategy {
     }
 
     @Override
-    public List<Position> getPath(Position from) {
+    public List<Position> getPath(Position from, Position to) {
         return directions.stream()
-                .flatMap(d -> from.moveIfInBounds(d).stream())
+                .flatMap(direction -> from.moveIfInBounds(direction).stream())
+                .filter(to::equals)
                 .toList();
     }
 
     @Override
-    public boolean canMove(Map<Position, Place> board, Position from, Position to, Side fromSide) {
-
-        Place toPlace = board.getOrDefault(to, new Empty());
-        if (toPlace.hasSide(fromSide)) {
+    public boolean canMove(List<Place> places, Side fromSide) {
+        if (places.isEmpty()) {
             return false;
         }
-        return directions.stream()
-                .flatMap(d -> from.moveIfInBounds(d).stream())
-                .anyMatch(to::equals);
+        return !isDestinationBlocked(places, fromSide);
     }
 
+    private boolean isDestinationBlocked(List<Place> places, Side fromSide) {
+        Place dest = places.get(places.size() - 1);
+        return dest.hasSide(fromSide);
+    }
 }

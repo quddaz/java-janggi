@@ -1,29 +1,24 @@
 package domain.place.piece;
 
 import domain.place.Place;
-import domain.place.moveStrategy.JumpMoveStrategy;
-import domain.place.moveStrategy.OneStepMoveStrategy;
-import domain.place.moveStrategy.StraightMoveStrategy;
 import domain.place.moveStrategy.ElephantMoveStrategy;
 import domain.place.moveStrategy.HorseMoveStrategy;
+import domain.place.moveStrategy.JumpMoveStrategy;
+import domain.place.moveStrategy.OneStepMoveStrategy;
 import domain.place.moveStrategy.SoldierMoveStrategy;
-import domain.place.palaceMoveStrategy.PalaceRestrictedMoveStrategy;
-import domain.place.palaceMoveStrategy.PalaceJumpMoveStrategy;
-import domain.place.palaceMoveStrategy.PalaceOneStepMoveStrategy;
-import domain.place.palaceMoveStrategy.PalaceSoldierMoveStrategy;
-import domain.place.palaceMoveStrategy.PalaceStraightMoveStrategy;
+import domain.place.moveStrategy.StraightMoveStrategy;
 import java.util.Arrays;
 import java.util.function.Function;
 
 public enum PieceFactory {
 
-    GENERAL("궁", side -> new General(side, new OneStepMoveStrategy(), new PalaceOneStepMoveStrategy())),
-    GUARD("사", side -> new Guard(side, new OneStepMoveStrategy(), new PalaceOneStepMoveStrategy())),
-    HORSE("마", side -> new Horse(side, new HorseMoveStrategy(), new PalaceRestrictedMoveStrategy())),
-    ELEPHANT("상", side -> new Elephant(side, new ElephantMoveStrategy(), new PalaceRestrictedMoveStrategy())),
-    CHARIOT("차", side -> new Chariot(side, new StraightMoveStrategy(), new PalaceStraightMoveStrategy())),
-    CANNON("포", side -> new Cannon(side, new JumpMoveStrategy(), new PalaceJumpMoveStrategy())),
-    SOLDIER("졸", side -> new Soldier(side, new SoldierMoveStrategy(side), new PalaceSoldierMoveStrategy(side)));
+    GENERAL("궁", side -> new General(side, new OneStepMoveStrategy())),
+    GUARD("사", side -> new Guard(side, new OneStepMoveStrategy())),
+    HORSE("마", side -> new Horse(side, new HorseMoveStrategy())),
+    ELEPHANT("상", side -> new Elephant(side, new ElephantMoveStrategy())),
+    CHARIOT("차", side -> new Chariot(side, new StraightMoveStrategy())),
+    CANNON("포", side -> new Cannon(side, new JumpMoveStrategy())),
+    SOLDIER("졸", side -> new Soldier(side, new SoldierMoveStrategy(side)));
 
     private final String code;
     private final Function<Side, Place> factory;

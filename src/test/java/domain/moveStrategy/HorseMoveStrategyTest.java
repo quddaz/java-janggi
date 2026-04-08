@@ -6,8 +6,6 @@ import domain.place.Place;
 import domain.place.moveStrategy.ElephantMoveStrategy;
 import domain.place.moveStrategy.HorseMoveStrategy;
 import domain.place.moveStrategy.MoveStrategy;
-import domain.place.palaceMoveStrategy.PalaceRestrictedMoveStrategy;
-import domain.place.palaceMoveStrategy.PalaceMoveStrategy;
 import domain.place.piece.Elephant;
 import domain.place.piece.Horse;
 import domain.place.piece.Side;
@@ -24,8 +22,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 class HorseMoveStrategyTest {
 
     private final MoveStrategy moveStrategy = new HorseMoveStrategy();
-    private final PalaceMoveStrategy palaceMoveStrategy = new PalaceRestrictedMoveStrategy();
-
     static Stream<Arguments> validMoves() {
         return Stream.of(
                 Arguments.of(new Position(5, 5), new Position(6, 7)),

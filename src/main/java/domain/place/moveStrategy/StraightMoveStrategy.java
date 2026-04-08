@@ -1,72 +1,67 @@
 package domain.place.moveStrategy;
 
-import domain.place.Empty;
 import domain.place.Place;
 import domain.place.piece.Side;
 import domain.position.Position;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 public class StraightMoveStrategy implements MoveStrategy {
-    private static final List<Direction> ORTHOGONAL_DIRECTIONS = List.of(
-            Direction.TOP, Direction.DOWN, Direction.LEFT, Direction.RIGHT
-    );
 
     @Override
-    public List<Position> getPath(Position from) {
-        List<Position> result = new ArrayList<>();
-        ORTHOGONAL_DIRECTIONS.forEach(direction -> collectLinePositions(result, from, direction));
-        return result;
-    }
-
-    private void collectLinePositions(List<Position> result, Position from, Direction direction) {
-        Optional<Position> current = from.moveIfInBounds(direction);
-
-        while (current.isPresent()) {
-            Position pos = current.get();
-            result.add(pos);
-
-            current = pos.moveIfInBounds(direction);
+    public List<Position> getPath(Position from, Position to) {
+        if (!from.isStraightWith(to)) {
+            return Collections.emptyList();
         }
+
+        Direction direction = Direction.straight(from, to);
+        return createPath(from, to, direction);
     }
 
     @Override
-    public boolean canMove(Map<Position, Place> board, Position from, Position to, Side fromSide) {
-        Place toPlace = board.getOrDefault(to, new Empty());
-        if (toPlace.hasSide(fromSide)) {
+    public boolean canMove(List<Place> places, Side fromSide) {
+        if (places.isEmpty()) {
             return false;
         }
-        return ORTHOGONAL_DIRECTIONS.stream()
-                .anyMatch(direction -> isPathClear(board, from, to, direction));
+        if (isDestinationBlocked(places, fromSide)) {
+            return false;
+        }
+        return isPathClear(places);
     }
 
-    private boolean isPathClear(Map<Position, Place> board,
-                                Position from,
-                                Position to,
-                                Direction direction) {
-        Optional<Position> current = from.moveIfInBounds(direction);
+    private List<Position> createPath(Position from, Position to, Direction direction) {
+        List<Position> path = new ArrayList<>();
+        Position current = from;
 
-        while (isNotAtDestination(current, to)) {
-            Position pos = current.get();
-            Place place = board.getOrDefault(pos, new Empty());
-            if (!place.isEmpty()) {
-                return false;
-            }
-
-            current = current.get().moveIfInBounds(direction);
+        while (!current.equals(to)) {
+            current = moveOrThrow(current, direction);
+            path.add(current);
         }
 
-        return isAtDestination(current, to);
+        return path;
     }
 
-    private boolean isAtDestination(Optional<Position> current, Position to) {
-        return current.isPresent() && current.get().equals(to);
+    private Position moveOrThrow(Position current, Direction direction) {
+        return current.moveIfInBounds(direction)
+                .orElseThrow(() -> new IllegalArgumentException("직선 이동 범위 벗어남"));
     }
 
-    private boolean isNotAtDestination(Optional<Position> current, Position to) {
-        return current.isPresent() && !current.get().equals(to);
+    private boolean isDestinationBlocked(List<Place> places, Side fromSide) {
+        Place dest = getLast(places);
+        return dest.hasSide(fromSide);
     }
 
+    private boolean isPathClear(List<Place> places) {
+        return getMiddle(places).stream()
+                .allMatch(Place::isEmpty);
+    }
+
+    private List<Place> getMiddle(List<Place> places) {
+        return places.subList(0, places.size() - 1);
+    }
+
+    private Place getLast(List<Place> places) {
+        return places.get(places.size() - 1);
+    }
 }

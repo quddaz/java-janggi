@@ -1,13 +1,11 @@
 package domain.place.moveStrategy;
 
-import domain.place.Empty;
 import domain.place.Place;
 import domain.place.piece.Side;
 import domain.position.Position;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class HorseMoveStrategy implements MoveStrategy {
 
@@ -23,40 +21,49 @@ public class HorseMoveStrategy implements MoveStrategy {
     );
 
     @Override
-    public List<Position> getPath(Position from) {
+    public List<Position> getPath(Position from, Position to) {
         return HORSE_MOVE_SEQUENCES.stream()
-                .flatMap(sequence -> getTargetPositionIfPathClear(from, sequence).stream())
-                .collect(Collectors.toList());
+                .map(sequence -> createPath(from, sequence))
+                .flatMap(Optional::stream)
+                .filter(path -> isDestination(path, to))
+                .findFirst()
+                .orElse(Collections.emptyList());
     }
 
     @Override
-    public boolean canMove(Map<Position, Place> board, Position from, Position to, Side fromSide) {
-        Place toPlace = board.getOrDefault(to, new Empty());
-        if (toPlace.hasSide(fromSide)) {
+    public boolean canMove(List<Place> places, Side fromSide) {
+        if (places.size() != 2) {
             return false;
         }
-        return HORSE_MOVE_SEQUENCES.stream()
-                .anyMatch(sequence -> canFollowSequence(board, from, to, sequence));
+
+        if (isBlockedAtFirstStep(places)) {
+            return false;
+        }
+        return !isDestinationBlocked(places, fromSide);
     }
 
-    private Optional<Position> getTargetPositionIfPathClear(Position from, List<Direction> sequence) {
-        Direction firstStepDirection = sequence.get(0);
-        Direction secondStepDirection = sequence.get(1);
+    private Optional<List<Position>> createPath(Position from, List<Direction> sequence) {
+        Direction first = sequence.get(0);
+        Direction second = sequence.get(1);
 
-        return from.moveIfInBounds(firstStepDirection)
-                .flatMap(firstStepPosition -> firstStepPosition.moveIfInBounds(secondStepDirection));
+        return from.moveIfInBounds(first)
+                .flatMap(firstPos ->
+                        firstPos.moveIfInBounds(second)
+                                .map(secondPos -> List.of(firstPos, secondPos))
+                );
     }
 
-    private boolean canFollowSequence(Map<Position, Place> board, Position from, Position to,
-                                      List<Direction> sequence) {
-        Direction firstStepDirection = sequence.get(0);
-        Direction secondStepDirection = sequence.get(1);
-
-        return from.moveIfInBounds(firstStepDirection)
-                .filter(firstStepPosition -> !board.containsKey(firstStepPosition))
-                .flatMap(firstStepPosition -> firstStepPosition.moveIfInBounds(secondStepDirection))
-                .filter(to::equals)
-                .isPresent();
+    private boolean isDestination(List<Position> path, Position to) {
+        return path.get(1).equals(to);
     }
 
+    private boolean isBlockedAtFirstStep(List<Place> places) {
+        Place first = places.get(0);
+        return !first.isEmpty();
+    }
+
+    private boolean isDestinationBlocked(List<Place> places, Side fromSide) {
+        Place dest = places.get(1);
+        return dest.hasSide(fromSide);
+    }
 }

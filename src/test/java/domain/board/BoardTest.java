@@ -3,12 +3,10 @@ package domain.board;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import domain.palaceMoveStrategy.PalaceStraightMoveStrategy;
 import domain.place.moveStrategy.OneStepMoveStrategy;
 import domain.place.moveStrategy.StraightMoveStrategy;
 import domain.place.moveStrategy.SoldierMoveStrategy;
-import domain.place.palaceMoveStrategy.PalaceOneStepMoveStrategy;
-import domain.place.palaceMoveStrategy.PalaceSoldierMoveStrategy;
-import domain.place.palaceMoveStrategy.PalaceStraightMoveStrategy;
 import domain.place.piece.Chariot;
 import domain.place.piece.General;
 import domain.place.piece.Side;
@@ -27,23 +25,18 @@ class BoardTest {
     void setup() {
         StubBoard stubBoard = new StubBoard();
         Position position = new Position(3, 1);
-        stubBoard.put(position, new Soldier(Side.CHO, new SoldierMoveStrategy(Side.CHO),
-                new PalaceSoldierMoveStrategy(Side.CHO)));
+        stubBoard.put(position, new Soldier(Side.CHO, new SoldierMoveStrategy(Side.CHO)));
 
         Position position2 = new Position(4, 1);
-        stubBoard.put(position2, new Soldier(Side.CHO, new SoldierMoveStrategy(Side.CHO),
-                new PalaceSoldierMoveStrategy(Side.CHO)));
+        stubBoard.put(position2, new Soldier(Side.CHO, new SoldierMoveStrategy(Side.CHO)));
 
         Position position3 = new Position(10, 9);
-        stubBoard.put(position3, new Chariot(Side.CHO, new StraightMoveStrategy(),
-                new PalaceStraightMoveStrategy()));
+        stubBoard.put(position3, new Chariot(Side.CHO, new StraightMoveStrategy()));
 
-        stubBoard.put(new Position(2,5), new General(Side.CHO, new OneStepMoveStrategy(),
-                new PalaceOneStepMoveStrategy()));
+        stubBoard.put(new Position(2,5), new General(Side.CHO, new OneStepMoveStrategy()));
 
         Position position4 = new Position(6, 1);
-        stubBoard.put(position4, new Soldier(Side.HAN, new SoldierMoveStrategy(Side.HAN),
-                new PalaceSoldierMoveStrategy(Side.HAN)));
+        stubBoard.put(position4, new Soldier(Side.HAN, new SoldierMoveStrategy(Side.HAN)));
 
         board = stubBoard.create();
     }
