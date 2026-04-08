@@ -12,15 +12,12 @@ public class StraightMoveStrategy implements MoveStrategy {
 
     @Override
     public List<Position> getPath(Position from, Position target) {
-
         if (isPalaceMove(from, target)) {
             return getPalacePath(from, target);
         }
-
         if (!from.isStraightWith(target)) {
             return Collections.emptyList();
         }
-
         Direction direction = Direction.straight(from, target);
         return createPath(from, target, direction);
     }

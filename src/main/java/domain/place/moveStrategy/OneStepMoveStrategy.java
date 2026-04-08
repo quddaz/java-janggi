@@ -32,17 +32,10 @@ public class OneStepMoveStrategy implements MoveStrategy {
     private List<Position> collectPath(Position from, Position target, Direction direction) {
         Optional<Position> next = from.moveIfInBounds(direction);
 
-        if (next.isEmpty()) {
-            return Collections.emptyList();
-        }
+        if(next.isPresent() && next.get().equals(target))
+            return List.of(next.get());
 
-        Position pos = next.get();
-
-        if (!pos.equals(target)) {
-            return Collections.emptyList();
-        }
-
-        return List.of(pos);
+        return Collections.emptyList();
     }
 
     private List<Position> getPalacePath(Position from, Position target) {

@@ -14,15 +14,12 @@ public class JumpMoveStrategy implements MoveStrategy {
 
     @Override
     public List<Position> getPath(Position fromPosition, Position targetPosition) {
-
         if (isPalaceMove(fromPosition, targetPosition)) {
             return getPalacePath(fromPosition, targetPosition);
         }
-
         if (!fromPosition.isStraightWith(targetPosition)) {
             return Collections.emptyList();
         }
-
         Direction direction = Direction.straight(fromPosition, targetPosition);
         return collectPath(fromPosition, targetPosition, direction);
     }
@@ -56,18 +53,26 @@ public class JumpMoveStrategy implements MoveStrategy {
 
     private boolean collectPalacePath(Position from, Position target, Direction direction, List<Position> path) {
         Position current = from;
+
         while (!current.equals(target)) {
-            Optional<Position> next = move(current, direction);
-            if (next.isEmpty()) {
+            if (!moveAndValidate(current, direction, path)) {
                 return false;
             }
-            current = next.get();
-            if (!PalaceArea.isInsidePalace(current)) {
-                return false;
-            }
-            path.add(current);
+            current = move(current, direction).get();
         }
+
         path.add(current);
+        return true;
+    }
+
+    private boolean moveAndValidate(Position current, Direction direction, List<Position> path) {
+        Optional<Position> next = move(current, direction);
+        if (next.isEmpty()) return false;
+
+        Position moved = next.get();
+        if (!PalaceArea.isInsidePalace(moved)) return false;
+
+        path.add(moved);
         return true;
     }
 

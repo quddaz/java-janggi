@@ -33,15 +33,12 @@ public class SoldierMoveStrategy implements MoveStrategy {
 
     @Override
     public List<Position> getPath(Position from, Position target) {
-
         if (isInsidePalace(from, target)) {
             return getPalacePath(from, target);
         }
-
         if (!from.isStraightWith(target)) {
             return Collections.emptyList();
         }
-
         return getNormalPath(from, target);
     }
 

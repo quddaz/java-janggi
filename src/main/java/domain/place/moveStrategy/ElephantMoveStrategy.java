@@ -48,17 +48,21 @@ public class ElephantMoveStrategy implements MoveStrategy {
         Position current = from;
 
         for (Direction direction : sequence) {
-            Optional<Position> next = current.moveIfInBounds(direction);
-
-            if (next.isEmpty()) {
-                return Optional.empty();
-            }
-
+            Optional<Position> next = moveStep(current, direction, result);
+            if (next.isEmpty()) return Optional.empty();
             current = next.get();
-            result.add(current);
         }
 
         return Optional.of(result);
+    }
+
+    private Optional<Position> moveStep(Position current, Direction direction, List<Position> result) {
+        Optional<Position> next = current.moveIfInBounds(direction);
+        if (next.isEmpty()) return Optional.empty();
+
+        Position moved = next.get();
+        result.add(moved);
+        return Optional.of(moved);
     }
 
     private boolean isValidPath(List<Position> path) {
