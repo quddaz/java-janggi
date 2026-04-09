@@ -2,9 +2,12 @@ package domain.board;
 
 import domain.place.Empty;
 import domain.place.Place;
-import domain.place.moveStrategy.JumpMoveStrategy;
+import domain.place.moveRule.CannonMoveRule;
+import domain.place.moveRule.ChariotMoveRule;
+import domain.place.moveRule.OneStepMoveRule;
+import domain.place.moveStrategy.CannonMoveStrategy;
 import domain.place.moveStrategy.OneStepMoveStrategy;
-import domain.place.moveStrategy.StraightMoveStrategy;
+import domain.place.moveStrategy.ChariotMoveStrategy;
 import domain.place.moveStrategy.MoveStrategy;
 import domain.place.moveStrategy.SoldierMoveStrategy;
 import domain.place.piece.Cannon;
@@ -75,7 +78,7 @@ public class BoardFactory {
 
         startLine += setupDirection;
         board.put(new Position(startLine, GENERAL_COLS),
-                new General(side, new OneStepMoveStrategy()));
+                new General(side, new OneStepMoveStrategy(new OneStepMoveRule())));
 
         startLine += setupDirection;
         cannonSetUpFormation(board, side, startLine);
@@ -86,18 +89,18 @@ public class BoardFactory {
 
     private static void firstSetUpFormation(Map<Position, Place> board, Side side, int startLine) {
         CHARIOT_COLS.forEach(c -> board.put(new Position(startLine, c),
-                new Chariot(side, new StraightMoveStrategy())));
+                new Chariot(side, new ChariotMoveStrategy(new ChariotMoveRule()))));
         GUARD_COLS.forEach(c -> board.put(new Position(startLine, c),
-                new Guard(side, new OneStepMoveStrategy())));
+                new Guard(side, new OneStepMoveStrategy(new OneStepMoveRule()))));
     }
 
     private static void cannonSetUpFormation(Map<Position, Place> board, Side side, int startLine) {
         CANNON_COLS.forEach(c -> board.put(new Position(startLine, c),
-                new Cannon(side, new JumpMoveStrategy())));
+                new Cannon(side, new CannonMoveStrategy(new CannonMoveRule()))));
     }
 
     private static void soldierSetUpFormation(Map<Position, Place> board, Side side, int startLine) {
-        MoveStrategy soldierMoveStrategy = new SoldierMoveStrategy(side);
+        MoveStrategy soldierMoveStrategy = new SoldierMoveStrategy(side, new OneStepMoveRule());
 
         SOLDIER_COLS.forEach(c -> board.put(new Position(startLine, c),
                 new Soldier(side, soldierMoveStrategy)));

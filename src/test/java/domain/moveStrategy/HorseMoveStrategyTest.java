@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import domain.place.Empty;
 import domain.place.Place;
+import domain.place.moveRule.ElephantMoveRule;
+import domain.place.moveRule.HorseRule;
 import domain.place.moveStrategy.ElephantMoveStrategy;
 import domain.place.moveStrategy.HorseMoveStrategy;
 import domain.place.moveStrategy.MoveStrategy;
@@ -21,7 +23,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class HorseMoveStrategyTest {
 
-    private final MoveStrategy moveStrategy = new HorseMoveStrategy();
+    private final MoveStrategy moveStrategy = new HorseMoveStrategy(new HorseRule());
 
     static Stream<Arguments> validMoves() {
         return Stream.of(
@@ -60,7 +62,7 @@ class HorseMoveStrategyTest {
 
         List<Position> path = moveStrategy.getPath(from, to);
         List<Place> places = emptyPlaces(path);
-        places.set(1, new Elephant(Side.HAN, new ElephantMoveStrategy()));
+        places.set(1, new Elephant(Side.HAN, new ElephantMoveStrategy(new ElephantMoveRule())));
 
         // when
         boolean result = moveStrategy.canMove(places, Side.CHO);
@@ -78,7 +80,7 @@ class HorseMoveStrategyTest {
 
         List<Position> path = moveStrategy.getPath(from, to);
         List<Place> places = emptyPlaces(path);
-        places.set(1, new Elephant(Side.CHO, new ElephantMoveStrategy()));
+        places.set(1, new Elephant(Side.CHO, new ElephantMoveStrategy(new ElephantMoveRule())));
 
         // when
         boolean result = moveStrategy.canMove(places, Side.CHO);
@@ -96,7 +98,7 @@ class HorseMoveStrategyTest {
 
         List<Position> path = moveStrategy.getPath(from, to);
         List<Place> places = emptyPlaces(path);
-        places.set(0, new Elephant(Side.HAN, new ElephantMoveStrategy()));
+        places.set(0, new Elephant(Side.HAN, new ElephantMoveStrategy(new ElephantMoveRule())));
 
         // when
         boolean result = moveStrategy.canMove(places, Side.CHO);

@@ -2,7 +2,7 @@ package domain.place.moveStrategy;
 
 import domain.place.PalaceArea;
 import domain.place.Place;
-import domain.place.piece.PieceSymbol;
+import domain.place.moveRule.MoveRule;
 import domain.place.piece.Side;
 import domain.position.Position;
 import java.util.ArrayList;
@@ -10,7 +10,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class JumpMoveStrategy implements MoveStrategy {
+public class CannonMoveStrategy implements MoveStrategy {
+
+    private final MoveRule moveRule;
+
+    public CannonMoveStrategy(MoveRule moveRule) {
+        this.moveRule = moveRule;
+    }
 
     @Override
     public List<Position> getPath(Position fromPosition, Position targetPosition) {
@@ -26,10 +32,7 @@ public class JumpMoveStrategy implements MoveStrategy {
 
     @Override
     public boolean canMove(List<Place> places, Side movingSide) {
-        return isValidPlaceSize(places)
-                && !isDestinationBlocked(places, movingSide)
-                && !containsInvalidJump(places)
-                && hasExactlyOneObstacle(places);
+        return moveRule.canMove(places, movingSide);
     }
 
     private boolean isPalaceMove(Position fromPosition, Position targetPosition) {
@@ -100,31 +103,4 @@ public class JumpMoveStrategy implements MoveStrategy {
         return Collections.emptyList();
     }
 
-    private boolean isDestinationBlocked(List<Place> places, Side movingSide) {
-        Place destination = getLast(places);
-        return destination.hasSide(movingSide) || destination.isSameSymbol(PieceSymbol.CANNON);
-    }
-
-    private boolean containsInvalidJump(List<Place> places) {
-        return getMiddle(places).stream()
-                .anyMatch(place -> place.isSameSymbol(PieceSymbol.CANNON));
-    }
-
-    private boolean hasExactlyOneObstacle(List<Place> places) {
-        return getMiddle(places).stream()
-                .filter(place -> !place.isEmpty())
-                .count() == 1;
-    }
-
-    private boolean isValidPlaceSize(List<Place> places) {
-        return !places.isEmpty();
-    }
-
-    private List<Place> getMiddle(List<Place> places) {
-        return places.subList(0, places.size() - 1);
-    }
-
-    private Place getLast(List<Place> places) {
-        return places.getLast();
-    }
 }

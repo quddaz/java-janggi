@@ -2,6 +2,7 @@ package domain.place.moveStrategy;
 
 import domain.place.PalaceArea;
 import domain.place.Place;
+import domain.place.moveRule.MoveRule;
 import domain.place.piece.Side;
 import domain.position.Position;
 import java.util.Collections;
@@ -9,6 +10,12 @@ import java.util.List;
 import java.util.Optional;
 
 public class OneStepMoveStrategy implements MoveStrategy {
+
+    private final MoveRule moveRule;
+
+    public OneStepMoveStrategy(MoveRule moveRule) {
+        this.moveRule = moveRule;
+    }
 
     @Override
     public List<Position> getPath(Position fromPosition, Position targetPosition) {
@@ -25,8 +32,7 @@ public class OneStepMoveStrategy implements MoveStrategy {
 
     @Override
     public boolean canMove(List<Place> places, Side movingSide) {
-        return isValidPlaceSize(places)
-                && !isDestinationBlocked(places, movingSide);
+        return moveRule.canMove(places, movingSide);
     }
 
     private List<Position> collectPath(Position from, Position target, Direction direction) {
@@ -67,16 +73,4 @@ public class OneStepMoveStrategy implements MoveStrategy {
                 Math.abs(from.getColumn() - to.getColumn());
     }
 
-    private boolean isValidPlaceSize(List<Place> places) {
-        return !places.isEmpty();
-    }
-
-    private boolean isDestinationBlocked(List<Place> places, Side movingSide) {
-        Place destination = getLast(places);
-        return destination.hasSide(movingSide);
-    }
-
-    private Place getLast(List<Place> places) {
-        return places.getLast();
-    }
 }

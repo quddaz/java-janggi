@@ -1,6 +1,7 @@
 package domain.place.moveStrategy;
 
 import domain.place.Place;
+import domain.place.moveRule.MoveRule;
 import domain.place.piece.Side;
 import domain.position.Position;
 import java.util.ArrayList;
@@ -21,6 +22,12 @@ public class ElephantMoveStrategy implements MoveStrategy {
             List.of(Direction.RIGHT, Direction.RIGHT_DOWN, Direction.RIGHT_DOWN)
     );
 
+    private final MoveRule moveRule;
+
+    public ElephantMoveStrategy(MoveRule moveRule) {
+        this.moveRule = moveRule;
+    }
+
     @Override
     public List<Position> getPath(Position from, Position to) {
         return ELEPHANT_MOVE_SEQUENCES.stream()
@@ -34,13 +41,7 @@ public class ElephantMoveStrategy implements MoveStrategy {
 
     @Override
     public boolean canMove(List<Place> places, Side fromSide) {
-        if (!isValidPlaceSize(places)) {
-            return false;
-        }
-
-        return !isBlockedAtFirstStep(places)
-                && !isBlockedAtSecondStep(places)
-                && !isDestinationBlocked(places, fromSide);
+        return moveRule.canMove(places, fromSide);
     }
 
     private Optional<List<Position>> moveSteps(Position from, List<Direction> sequence) {
@@ -71,21 +72,5 @@ public class ElephantMoveStrategy implements MoveStrategy {
 
     private boolean isDestination(List<Position> path, Position to) {
         return isValidPath(path) && path.get(2).equals(to);
-    }
-
-    private boolean isValidPlaceSize(List<Place> places) {
-        return places.size() == 3;
-    }
-
-    private boolean isBlockedAtFirstStep(List<Place> places) {
-        return !places.getFirst().isEmpty();
-    }
-
-    private boolean isBlockedAtSecondStep(List<Place> places) {
-        return !places.get(1).isEmpty();
-    }
-
-    private boolean isDestinationBlocked(List<Place> places, Side fromSide) {
-        return places.get(2).hasSide(fromSide);
     }
 }

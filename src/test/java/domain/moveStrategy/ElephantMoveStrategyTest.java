@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import domain.place.Empty;
 import domain.place.Place;
+import domain.place.moveRule.ElephantMoveRule;
 import domain.place.moveStrategy.ElephantMoveStrategy;
 import domain.place.moveStrategy.MoveStrategy;
 import domain.place.piece.Elephant;
@@ -20,7 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class ElephantMoveStrategyTest {
 
-    private final MoveStrategy moveStrategy = new ElephantMoveStrategy();
+    private final MoveStrategy moveStrategy = new ElephantMoveStrategy(new ElephantMoveRule());
 
     static Stream<Arguments> validMoves() {
         return Stream.of(

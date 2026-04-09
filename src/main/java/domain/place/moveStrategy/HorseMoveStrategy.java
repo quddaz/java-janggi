@@ -1,6 +1,7 @@
 package domain.place.moveStrategy;
 
 import domain.place.Place;
+import domain.place.moveRule.MoveRule;
 import domain.place.piece.Side;
 import domain.position.Position;
 import java.util.Collections;
@@ -20,6 +21,12 @@ public class HorseMoveStrategy implements MoveStrategy {
             List.of(Direction.RIGHT, Direction.RIGHT_DOWN)
     );
 
+    private final MoveRule moveRule;
+
+    public HorseMoveStrategy(MoveRule moveRule) {
+        this.moveRule = moveRule;
+    }
+
     @Override
     public List<Position> getPath(Position fromPosition, Position targetPosition) {
         return HORSE_MOVE_SEQUENCES.stream()
@@ -33,12 +40,7 @@ public class HorseMoveStrategy implements MoveStrategy {
 
     @Override
     public boolean canMove(List<Place> places, Side movingSide) {
-        if (!isValidPlaceSize(places)) {
-            return false;
-        }
-
-        return !isBlockedAtFirstStep(places)
-                && !isDestinationBlocked(places, movingSide);
+        return moveRule.canMove(places, movingSide);
     }
 
     private Optional<List<Position>> createPath(Position fromPosition, List<Direction> sequence) {
@@ -60,15 +62,4 @@ public class HorseMoveStrategy implements MoveStrategy {
         return isValidPath(path) && path.get(1).equals(targetPosition);
     }
 
-    private boolean isValidPlaceSize(List<Place> places) {
-        return places != null && places.size() == 2;
-    }
-
-    private boolean isBlockedAtFirstStep(List<Place> places) {
-        return !places.getFirst().isEmpty();
-    }
-
-    private boolean isDestinationBlocked(List<Place> places, Side movingSide) {
-        return places.get(1).hasSide(movingSide);
-    }
 }

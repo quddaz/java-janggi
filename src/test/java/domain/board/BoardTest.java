@@ -3,9 +3,11 @@ package domain.board;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import domain.place.moveRule.ChariotMoveRule;
+import domain.place.moveRule.OneStepMoveRule;
 import domain.place.moveStrategy.OneStepMoveStrategy;
 import domain.place.moveStrategy.SoldierMoveStrategy;
-import domain.place.moveStrategy.StraightMoveStrategy;
+import domain.place.moveStrategy.ChariotMoveStrategy;
 import domain.place.piece.Chariot;
 import domain.place.piece.General;
 import domain.place.piece.Side;
@@ -24,18 +26,18 @@ class BoardTest {
     void setup() {
         StubBoard stubBoard = new StubBoard();
         Position position = new Position(3, 1);
-        stubBoard.put(position, new Soldier(Side.CHO, new SoldierMoveStrategy(Side.CHO)));
+        stubBoard.put(position, new Soldier(Side.CHO, new SoldierMoveStrategy(Side.CHO, new OneStepMoveRule())));
 
         Position position2 = new Position(4, 1);
-        stubBoard.put(position2, new Soldier(Side.CHO, new SoldierMoveStrategy(Side.CHO)));
+        stubBoard.put(position2, new Soldier(Side.CHO, new SoldierMoveStrategy(Side.CHO, new OneStepMoveRule())));
 
         Position position3 = new Position(10, 9);
-        stubBoard.put(position3, new Chariot(Side.CHO, new StraightMoveStrategy()));
+        stubBoard.put(position3, new Chariot(Side.CHO, new ChariotMoveStrategy(new ChariotMoveRule())));
 
-        stubBoard.put(new Position(2, 5), new General(Side.CHO, new OneStepMoveStrategy()));
+        stubBoard.put(new Position(2, 5), new General(Side.CHO, new OneStepMoveStrategy(new OneStepMoveRule())));
 
         Position position4 = new Position(6, 1);
-        stubBoard.put(position4, new Soldier(Side.HAN, new SoldierMoveStrategy(Side.HAN)));
+        stubBoard.put(position4, new Soldier(Side.HAN, new SoldierMoveStrategy(Side.HAN, new OneStepMoveRule())));
 
         board = stubBoard.create();
     }

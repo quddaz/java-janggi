@@ -2,6 +2,7 @@ package domain.place.moveStrategy;
 
 import domain.place.PalaceArea;
 import domain.place.Place;
+import domain.place.moveRule.MoveRule;
 import domain.place.piece.Side;
 import domain.position.Position;
 import java.util.Collections;
@@ -11,10 +12,12 @@ public class SoldierMoveStrategy implements MoveStrategy {
 
     private final List<Direction> normalDirections;
     private final List<Direction> palaceDirections;
+    private final MoveRule moveRule;
 
-    public SoldierMoveStrategy(Side side) {
+    public SoldierMoveStrategy(Side side, MoveRule moveRule) {
         this.normalDirections = initNormalDirections(side);
         this.palaceDirections = initPalaceDirections(side);
+        this.moveRule = moveRule;
     }
 
     private List<Direction> initNormalDirections(Side side) {
@@ -42,6 +45,11 @@ public class SoldierMoveStrategy implements MoveStrategy {
         return getNormalPath(from, target);
     }
 
+    @Override
+    public boolean canMove(List<Place> places, Side movingSide) {
+        return moveRule.canMove(places, movingSide);
+    }
+
     private boolean isInsidePalace(Position from, Position to) {
         return PalaceArea.isInsideSpecialPalace(from) && PalaceArea.isInsideSpecialPalace(to);
     }
@@ -64,20 +72,4 @@ public class SoldierMoveStrategy implements MoveStrategy {
                 .orElse(Collections.emptyList());
     }
 
-    @Override
-    public boolean canMove(List<Place> places, Side movingSide) {
-        return isValidPlaceSize(places) && !isDestinationBlocked(places, movingSide);
-    }
-
-    private boolean isValidPlaceSize(List<Place> places) {
-        return !places.isEmpty();
-    }
-
-    private boolean isDestinationBlocked(List<Place> places, Side movingSide) {
-        return getLast(places).hasSide(movingSide);
-    }
-
-    private Place getLast(List<Place> places) {
-        return places.getLast();
-    }
 }

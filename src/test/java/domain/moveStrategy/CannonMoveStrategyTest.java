@@ -4,7 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import domain.place.Empty;
 import domain.place.Place;
-import domain.place.moveStrategy.JumpMoveStrategy;
+import domain.place.moveRule.CannonMoveRule;
+import domain.place.moveStrategy.CannonMoveStrategy;
 import domain.place.moveStrategy.MoveStrategy;
 import domain.place.piece.Cannon;
 import domain.place.piece.Side;
@@ -19,9 +20,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class JumpMoveStrategyTest {
+class CannonMoveStrategyTest {
 
-    private final MoveStrategy moveStrategy = new JumpMoveStrategy();
+    private final MoveStrategy moveStrategy = new CannonMoveStrategy(new CannonMoveRule());
 
     static Stream<Arguments> validJumpMoves() {
         return Stream.of(

@@ -2,13 +2,20 @@ package domain.place.moveStrategy;
 
 import domain.place.PalaceArea;
 import domain.place.Place;
+import domain.place.moveRule.MoveRule;
 import domain.place.piece.Side;
 import domain.position.Position;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class StraightMoveStrategy implements MoveStrategy {
+public class ChariotMoveStrategy implements MoveStrategy {
+
+    private final MoveRule moveRule;
+
+    public ChariotMoveStrategy(MoveRule moveRule) {
+        this.moveRule = moveRule;
+    }
 
     @Override
     public List<Position> getPath(Position from, Position target) {
@@ -20,6 +27,11 @@ public class StraightMoveStrategy implements MoveStrategy {
         }
         Direction direction = Direction.straight(from, target);
         return createPath(from, target, direction);
+    }
+
+    @Override
+    public boolean canMove(List<Place> places, Side movingSide) {
+        return moveRule.canMove(places, movingSide);
     }
 
     private boolean isPalaceMove(Position from, Position to) {
@@ -51,34 +63,6 @@ public class StraightMoveStrategy implements MoveStrategy {
         }
 
         return path;
-    }
-
-    @Override
-    public boolean canMove(List<Place> places, Side movingSide) {
-        return isValidPlaceSize(places)
-                && !isDestinationBlocked(places, movingSide)
-                && isPathClear(places);
-    }
-
-    private boolean isValidPlaceSize(List<Place> places) {
-        return !places.isEmpty();
-    }
-
-    private boolean isDestinationBlocked(List<Place> places, Side movingSide) {
-        return getLast(places).hasSide(movingSide);
-    }
-
-    private boolean isPathClear(List<Place> places) {
-        return getMiddle(places).stream()
-                .allMatch(Place::isEmpty);
-    }
-
-    private List<Place> getMiddle(List<Place> places) {
-        return places.subList(0, places.size() - 1);
-    }
-
-    private Place getLast(List<Place> places) {
-        return places.getLast();
     }
 
     private List<Position> createPath(Position from, Position target, Direction direction) {

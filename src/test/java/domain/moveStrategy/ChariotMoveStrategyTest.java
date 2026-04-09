@@ -4,8 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import domain.place.Empty;
 import domain.place.Place;
+import domain.place.moveRule.ChariotMoveRule;
 import domain.place.moveStrategy.MoveStrategy;
-import domain.place.moveStrategy.StraightMoveStrategy;
+import domain.place.moveStrategy.ChariotMoveStrategy;
 import domain.place.piece.Chariot;
 import domain.place.piece.Guard;
 import domain.place.piece.Side;
@@ -19,9 +20,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class StraightMoveStrategyTest {
+class ChariotMoveStrategyTest {
 
-    private final MoveStrategy strategy = new StraightMoveStrategy();
+    private final MoveStrategy strategy = new ChariotMoveStrategy(new ChariotMoveRule());
 
     static Stream<Arguments> validMoves() {
         return Stream.of(

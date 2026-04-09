@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import domain.place.Empty;
 import domain.place.Place;
+import domain.place.moveRule.OneStepMoveRule;
 import domain.place.moveStrategy.MoveStrategy;
 import domain.place.moveStrategy.SoldierMoveStrategy;
 import domain.place.piece.Side;
@@ -41,7 +42,7 @@ class SoldierMoveStrategyTest {
     @MethodSource("validMoves")
     void can_move(Side side, Position from, Position to) {
         // given
-        MoveStrategy strategy = new SoldierMoveStrategy(side);
+        MoveStrategy strategy = new SoldierMoveStrategy(side, new OneStepMoveRule());
         List<Position> path = strategy.getPath(from, to);
         List<Place> places = emptyPlaces(path);
 
@@ -57,7 +58,7 @@ class SoldierMoveStrategyTest {
     void cannot_move_to_same_team() {
         // given
         Side side = Side.CHO;
-        MoveStrategy strategy = new SoldierMoveStrategy(side);
+        MoveStrategy strategy = new SoldierMoveStrategy(side, new OneStepMoveRule());
 
         Position from = new Position(2, 2);
         Position to = new Position(2, 3);

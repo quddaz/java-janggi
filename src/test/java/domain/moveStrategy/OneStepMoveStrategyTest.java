@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import domain.place.Empty;
 import domain.place.Place;
+import domain.place.moveRule.OneStepMoveRule;
 import domain.place.moveStrategy.MoveStrategy;
 import domain.place.moveStrategy.OneStepMoveStrategy;
 import domain.place.piece.Guard;
@@ -20,7 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class OneStepMoveStrategyTest {
 
-    private final MoveStrategy strategy = new OneStepMoveStrategy();
+    private final MoveStrategy strategy = new OneStepMoveStrategy(new OneStepMoveRule());
 
     static Stream<Arguments> validMoves() {
         return Stream.of(
