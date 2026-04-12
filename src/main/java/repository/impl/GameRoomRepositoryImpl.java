@@ -2,6 +2,7 @@ package repository.impl;
 
 import domain.place.piece.Side;
 import dto.GameRoomDto;
+import dto.GameRoomRow;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,22 +27,23 @@ public class GameRoomRepositoryImpl implements GameRoomRepository {
 
     @Override
     public List<GameRoomDto> findAll(Connection conn) {
-        try (ResultSet rs = gameRoomDao.findAll(conn)) {
-            return toList(rs);
+        try {
+            List<GameRoomRow> rows = gameRoomDao.findAll(conn);
+            return rows.stream()
+                    .map(this::toDto)
+                    .toList();
         } catch (SQLException e) {
-            throw new RuntimeException("[ERROR] 조회 실패", e);
+            throw new RuntimeException(e);
         }
     }
 
     @Override
     public Optional<GameRoomDto> findById(long id, Connection conn) {
-        try (ResultSet rs = gameRoomDao.findById(conn, id)) {
-            if (rs.next()) {
-                return Optional.of(toGameRoom(rs));
-            }
-            return Optional.empty();
+        try {
+            return gameRoomDao.findById(conn, id)
+                    .map(this::toDto);
         } catch (SQLException e) {
-            throw new RuntimeException("[ERROR] 조회 실패", e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -54,20 +56,13 @@ public class GameRoomRepositoryImpl implements GameRoomRepository {
         }
     }
 
-    private List<GameRoomDto> toList(ResultSet rs) throws SQLException {
-        List<GameRoomDto> result = new ArrayList<>();
-        while (rs.next()) {
-            result.add(toGameRoom(rs));
-        }
-        return result;
-    }
-
-    private GameRoomDto toGameRoom(ResultSet rs) throws SQLException {
+    private GameRoomDto toDto(GameRoomRow row) {
         return GameRoomDto.of(
-                rs.getLong("id"),
-                rs.getString("name"),
-                Side.from(rs.getString("current_turn")),
-                rs.getTimestamp("created_at").toLocalDateTime()
+                row.id(),
+                row.name(),
+                Side.from(row.currentTurn()),
+                row.createdAt()
         );
     }
+
 }

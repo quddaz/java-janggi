@@ -2,10 +2,13 @@ package repository;
 
 import domain.place.Place;
 import domain.position.Position;
+import dto.BoardRow;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class BoardDao {
@@ -52,9 +55,28 @@ public class BoardDao {
         stmt.addBatch();
     }
 
-    public ResultSet findBoard(Connection conn, long roomId) throws SQLException {
-        PreparedStatement stmt = conn.prepareStatement(SELECT_SQL);
-        stmt.setLong(1, roomId);
-        return stmt.executeQuery();
+    public List<BoardRow> findBoard(Connection conn, long roomId) throws SQLException {
+        try (PreparedStatement stmt = conn.prepareStatement(SELECT_SQL)) {
+            stmt.setLong(1, roomId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                return mapRows(rs);
+            }
+        }
+    }
+
+    private List<BoardRow> mapRows(ResultSet rs) throws SQLException {
+        List<BoardRow> result = new ArrayList<>();
+
+        while (rs.next()) {
+            result.add(new BoardRow(
+                    rs.getInt("position_row"),
+                    rs.getInt("position_col"),
+                    rs.getString("side"),
+                    rs.getString("type")
+            ));
+        }
+
+        return result;
     }
 }
