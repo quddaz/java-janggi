@@ -1,5 +1,6 @@
 package service;
 
+import domain.board.Board;
 import infra.DBExecutor;
 import domain.place.Place;
 import domain.place.piece.Side;
@@ -38,7 +39,7 @@ public class GameService {
         });
     }
 
-    public Map<Position, Place> findBoardByRoomId(long roomId) {
+    public Board findBoardByRoomId(long roomId) {
         return dbExecutor.transaction(connection -> {
             findGameRoomByRoomId(roomId);
             return boardRepository.findBoard(roomId, connection);

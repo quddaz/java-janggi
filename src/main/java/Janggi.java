@@ -65,7 +65,7 @@ public class Janggi {
 
     private Game createLoadedGame(long roomId) {
         GameRoomDto gameRoomDto = gameService.findGameRoomByRoomId(roomId);
-        Board board = new Board(gameService.findBoardByRoomId(roomId));
+        Board board = gameService.findBoardByRoomId(roomId);
 
         return new Game(board, gameRoomDto.side(), roomId);
     }

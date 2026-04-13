@@ -1,5 +1,6 @@
 package repository.impl;
 
+import domain.board.Board;
 import domain.board.BoardFactory;
 import domain.place.Place;
 import domain.place.piece.PieceFactory;
@@ -32,7 +33,7 @@ public class BoardRepositoryImpl implements BoardRepository {
     }
 
     @Override
-    public Map<Position, Place> findBoard(long roomId, Connection conn) {
+    public Board findBoard(long roomId, Connection conn) {
         try {
             List<BoardRow> rows = boardDao.findById(conn, roomId);
             return toBoard(rows);
@@ -52,14 +53,14 @@ public class BoardRepositoryImpl implements BoardRepository {
                 .toList();
     }
 
-    private Map<Position, Place> toBoard(List<BoardRow> rows) {
+    private Board toBoard(List<BoardRow> rows) {
         Map<Position, Place> board = BoardFactory.setUpEmpty();
 
         for (BoardRow row : rows) {
             board.put(toPosition(row), toPlace(row));
         }
 
-        return board;
+        return new Board(board);
     }
 
     private Position toPosition(BoardRow row) {
