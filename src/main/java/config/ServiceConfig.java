@@ -1,7 +1,7 @@
 package config;
 
 import infra.DBExecutor;
-import repository.BoardRepository;
+import domain.board.BoardRepository;
 import repository.GameRoomRepository;
 import service.GameService;
 

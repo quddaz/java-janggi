@@ -14,7 +14,11 @@ import repository.GameRoomRepository;
 
 public class GameRoomRepositoryImpl implements GameRoomRepository {
 
-    private final GameRoomDao gameRoomDao = new GameRoomDao();
+    private final GameRoomDao gameRoomDao;
+
+    public GameRoomRepositoryImpl(GameRoomDao gameRoomDao) {
+        this.gameRoomDao = gameRoomDao;
+    }
 
     @Override
     public long save(String name, String side, Connection conn) {
@@ -38,7 +42,7 @@ public class GameRoomRepositoryImpl implements GameRoomRepository {
     }
 
     @Override
-    public Optional<GameRoomDto> findById(long id, Connection conn) {
+    public Optional<GameRoomDto> findGameRoomById(long id, Connection conn) {
         try {
             return gameRoomDao.findById(conn, id)
                     .map(this::toDto);

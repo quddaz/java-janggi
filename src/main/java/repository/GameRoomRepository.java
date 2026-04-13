@@ -10,7 +10,7 @@ public interface GameRoomRepository {
 
     List<GameRoomDto> findAll(Connection conn);
 
-    Optional<GameRoomDto> findById(long id, Connection conn);
+    Optional<GameRoomDto> findGameRoomById(long id, Connection conn);
 
     void update(long id, String side, Connection conn);
 }

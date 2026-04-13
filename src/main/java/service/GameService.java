@@ -7,7 +7,7 @@ import domain.position.Position;
 import dto.GameRoomDto;
 import java.util.List;
 import java.util.Map;
-import repository.BoardRepository;
+import domain.board.BoardRepository;
 import repository.GameRoomRepository;
 
 public class GameService {
@@ -47,7 +47,7 @@ public class GameService {
 
     public GameRoomDto findGameRoomByRoomId(long roomId){
         return dbExecutor.transaction(connection -> {
-            return gameRoomRepository.findById(roomId, connection)
+            return gameRoomRepository.findGameRoomById(roomId, connection)
                     .orElseThrow(() -> new IllegalArgumentException("[ERROR] 해당 방은 없습니다."));
         });
     }

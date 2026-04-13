@@ -1,4 +1,4 @@
-package repository;
+package domain.board;
 
 import domain.place.Place;
 import domain.position.Position;

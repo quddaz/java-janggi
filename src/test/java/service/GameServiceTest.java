@@ -8,12 +8,15 @@ import domain.board.BoardFactory;
 import domain.place.Place;
 import domain.place.piece.Side;
 import domain.position.Position;
+import infra.ConnectionManager;
 import infra.DBExecutor;
 import infra.H2ConnectionManager;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import repository.BoardDao;
+import repository.GameRoomDao;
 import repository.impl.BoardRepositoryImpl;
 import repository.impl.GameRoomRepositoryImpl;
 
@@ -27,14 +30,14 @@ public class GameServiceTest {
 
     @BeforeEach
     void setUp() {
-        H2ConnectionManager connectionManager = new H2ConnectionManager(URL, USER, PASSWORD);
+        ConnectionManager connectionManager = new H2ConnectionManager(URL, USER, PASSWORD);
         TestDatabaseInitializer testDatabaseInitializer = new TestDatabaseInitializer(connectionManager);
         testDatabaseInitializer.init();
 
         DBExecutor dbExecutor = new DBExecutor(connectionManager);
 
-        gameService = new GameService(new BoardRepositoryImpl(),
-                new GameRoomRepositoryImpl(),
+        gameService = new GameService(new BoardRepositoryImpl(new BoardDao()),
+                new GameRoomRepositoryImpl(new GameRoomDao()),
                 dbExecutor);
     }
 

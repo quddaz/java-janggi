@@ -29,33 +29,26 @@ public class BoardDao {
         }
     }
 
-    public void insertBoard(Connection conn, long roomId, Map<Position, Place> board) throws SQLException {
+    public void insert(Connection conn, long roomId, List<BoardRow> board) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(INSERT_SQL)) {
-            for (Map.Entry<Position, Place> entry : board.entrySet()) {
-                addBatch(stmt, roomId, entry);
+            for (BoardRow boardRow : board) {
+                addBatch(stmt, roomId, boardRow);
             }
             stmt.executeBatch();
         }
     }
 
-    private void addBatch(PreparedStatement stmt, long roomId, Map.Entry<Position, Place> entry) throws SQLException {
-        Place place = entry.getValue();
-        if (place.getSide().isEmpty()) {
-            return;
-        }
-
-        Position pos = entry.getKey();
-
+    private void addBatch(PreparedStatement stmt, long roomId, BoardRow boardRow) throws SQLException {
         stmt.setLong(1, roomId);
-        stmt.setInt(2, pos.getRow());
-        stmt.setInt(3, pos.getColumn());
-        stmt.setString(4, place.getSide().get().getName());
-        stmt.setString(5, place.getFormat());
+        stmt.setInt(2, boardRow.row());
+        stmt.setInt(3, boardRow.col());
+        stmt.setString(4, boardRow.side());
+        stmt.setString(5, boardRow.type());
 
         stmt.addBatch();
     }
 
-    public List<BoardRow> findBoard(Connection conn, long roomId) throws SQLException {
+    public List<BoardRow> findById(Connection conn, long roomId) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(SELECT_SQL)) {
             stmt.setLong(1, roomId);
 

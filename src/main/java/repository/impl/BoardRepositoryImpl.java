@@ -7,22 +7,25 @@ import domain.place.piece.Side;
 import domain.position.Position;
 import dto.BoardRow;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import repository.BoardDao;
-import repository.BoardRepository;
+import domain.board.BoardRepository;
 
 public class BoardRepositoryImpl implements BoardRepository {
 
-    private final BoardDao boardDao = new BoardDao();
+    private final BoardDao boardDao;
+
+    public BoardRepositoryImpl(BoardDao boardDao) {
+        this.boardDao = boardDao;
+    }
 
     @Override
     public void saveBoard(long roomId, Map<Position, Place> board, Connection conn) {
         try {
             boardDao.deleteByRoomId(conn, roomId);
-            boardDao.insertBoard(conn, roomId, board);
+            boardDao.insert(conn, roomId, toCells(board));
         } catch (SQLException e) {
             throw new RuntimeException("[ERROR] 저장 실패", e);
         }
@@ -31,11 +34,22 @@ public class BoardRepositoryImpl implements BoardRepository {
     @Override
     public Map<Position, Place> findBoard(long roomId, Connection conn) {
         try {
-            List<BoardRow> rows = boardDao.findBoard(conn, roomId);
+            List<BoardRow> rows = boardDao.findById(conn, roomId);
             return toBoard(rows);
         } catch (SQLException e) {
             throw new RuntimeException("[ERROR] 조회 실패", e);
         }
+    }
+
+    private List<BoardRow> toCells(Map<Position, Place> board){
+        return board.entrySet().stream()
+                .filter(e -> !e.getValue().isEmpty())
+                .map(e -> new BoardRow(
+                        e.getKey().getRow(),
+                        e.getKey().getColumn(),
+                        e.getValue().getSide().toString(),
+                        e.getValue().getFormat()))
+                .toList();
     }
 
     private Map<Position, Place> toBoard(List<BoardRow> rows) {
